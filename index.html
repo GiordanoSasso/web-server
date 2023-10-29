@@ -1,0 +1,203 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Open+Sans:wght@300&family=Roboto:wght@100&display=swap');
+
+        * {
+            font-family: 'Roboto', sans-serif;
+            font-size: 1em;
+        }
+
+        .formGroup {
+            display: flex;
+            flex-direction: column;
+            margin: 1em;
+            align-items: space-around;
+        }
+
+        .formRow {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            margin: 1em;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2em;
+            color: #27348B;
+        }
+
+        #logo {
+            float: right;
+        }
+
+        h2 {
+            margin-left: px;
+            margin: 1em;
+            color: #2D9CDB;
+        }
+
+        * {
+            color: gray;
+        }
+
+        input {
+            line-height: 1;
+            height: 2em;
+        }
+
+        label {
+            margin-bottom: 0.2em;
+        }
+
+        body {
+            margin: 2em;
+        }
+
+        button {
+            height: 2em;
+            background-color: #27348B;
+            border: 1pt solid #27348B;
+            font-size: 1em;
+            border-radius: 3px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            height: 2.5em;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        tr,
+        th,
+        td {
+            border: 1pt solid gray;
+            padding: 3;
+            font-size: 0.9em;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        #main {
+            display: flex;
+        }
+
+        .valor {
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <img id="logo" src="unisinos-logo.svg" width="200">
+    <header>
+        <h1>Form vendas</h1>
+    </header>
+    <div id="main">
+        <section>
+            <h2>Cadastrar venda</h2>
+            <article id="formVenda">
+                <div class="formRow">
+                    <label>Produto</label>
+                    <input type="text" id="txProduto" placeholder="Digite o nome do produto">
+                </div>
+                <div class="formRow">
+                    <label>Vendedor</label>
+                    <input type="text" id="txVendedor" placeholder="Digite o nome do vendedor">
+                </div>
+                <div class="formRow">
+                    <label>Cliente</label>
+                    <input type="text" id="txCliente" placeholder="Digite o nome do cliente">
+                </div>
+                <div class="formRow">
+                    <label>Data da Venda</label>
+                    <input type="date" id="dtVenda" placeholder="Informe data de venda">
+                </div>
+                <div class="formRow">
+                    <label>Valor</label>
+                    <input type="number" id="vlVenda" placeholder="Informe o valor vendido">
+                </div>
+                <div class="formRow">
+                    <button onclick="salvar()">Salvar</button>
+                </div>
+            </article>
+        </section>
+        <section id="lista">
+            <button onclick="carregarDados()">Carregar dados</button>
+            <table id="registros">
+                <tr>
+                    <th>Produto</th>
+                    <th>Vendedor</th>
+                    <th>Cliente</th>
+                    <th>Valor</th>
+                </tr>
+            </table>
+        </section>
+    </div>
+    <script>
+        function carregarDados() {
+            var myRequest = new Request('http://localhost:3000/venda');
+            fetch(myRequest)
+                .then(response => {
+                    if (response.status === 200) {
+                        // Se o resultado for um objeto JSON, tratar resposta como .json()
+                        // Se o resultado for um objeto binário, como uma imagem, tratar resposta com .blob()
+                        // return response.text(); // para tratar texto
+                        return response.json();
+                    } else {
+                        throw new Error('Ops! Houve um erro em nosso servidor.');
+                    }
+                })
+                .then(response => {
+                    recuperarDados(response);
+                }).catch(error => {
+                    console.error(error);
+                });
+        }
+
+        function recuperarDados(obj) {
+            const tbl = document.getElementById('registros');
+            tbl.innerHTML = '';
+            for (let index = 0; index < obj.length; index++) {
+                const element = obj[index];
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + element.produto + '</td>'
+                    + '<td>' + element.vendedor + '</td>'
+                    + '<td>' + element.cliente + '</td>'
+                    + '<td class="valor">' + element.valor + '</td>';
+                tbl.appendChild(tr);
+            }
+        }
+
+        function salvar() {
+
+            const venda = {
+                produto: document.getElementById('txProduto').value,
+                vendedor: document.getElementById('txVendedor').value,
+                cliente: document.getElementById('txCliente').value,
+                data: document.getElementById('dtVenda').value,
+                valor: document.getElementById('vlVenda').value
+            }
+
+            fetch('http://localhost:3000/venda', {
+                    method: 'POST',  // POST - para atualizar dados!!!
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(venda),
+                }).then((response) => response.text())
+                    .then((responseText) => {
+                        alert('Resposta back-end: ' + responseText);
+                    });
+        }
+    </script>
+</body>
+
+</html>

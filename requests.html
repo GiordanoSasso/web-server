@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link href="https://fonts.googleapis.com/css?family=Josefin+Sans|Rajdhani|Saira+Condensed" rel="stylesheet">
+	<style>
+		
+	</style>
+</head>
+
+<body>
+	<script>
+		function request1() {
+			var myRequest = new Request('http://localhost:3003/calc?op1=5&op=*&op2=3');
+			fetch(myRequest)
+				.then(response => {
+					if (response.status === 200) {
+						// Se o resultado for um objeto JSON, tratar resposta como .json()
+						// Se o resultado for um objeto binário, como uma imagem, tratar resposta com .blob()
+						// return response.text(); // para tratar texto
+						return response.json(); 
+					} else {
+						throw new Error('Ops! Houve um erro em nosso servidor.');
+					}
+				})
+				.then(response => {
+					// alert(response.msg);
+					atualizaExp(response);
+				}).catch(error => {
+					console.error(error);
+				});
+		}
+
+		function request2() {
+			var request = new XMLHttpRequest();
+
+			request.addEventListener("progress", updateProgress, false);
+			request.addEventListener("load", transferComplete, false);
+			request.addEventListener("error", transferFailed, false);
+			request.addEventListener("abort", transferCanceled, false);
+
+			request.open("GET", 'http://localhost:3003/calc?op1=5&op=x&op2=3', true);
+			request.send();
+			// request.onload (
+			// 	transferComplete(e);
+			// )
+		}
+
+		function updateProgress (oEvent) {
+			if (oEvent.lengthComputable) {
+				var percentComplete = oEvent.loaded / oEvent.total;
+				var r = Math.trunc(percentComplete * 10000 + 0.5);
+				r = r / 100;
+				console.log('Total processado: ' + r + ' %.');
+			} else {
+				// Não é possível calcular informações de progresso uma vez que a dimensão total é desconhecida
+				console.log('Não foi possível determinar progresso');
+			}
+		}
+
+		function transferComplete(evt) {
+			if (evt.target.status === 200) {
+				alert(evt.target.response);
+			} else {
+				// Erro de RN
+				// alert('requisição funcinou!!');
+				transferFailed(evt);
+			}
+		}
+
+		function transferFailed(evt) {
+			alert("Um erro ocorreu durante a requisição: " + evt.target.response);
+		}
+
+		function transferCanceled(evt) {
+			alert("A transferência foi cancelada pelo usuário.");
+		}
+
+
+		function atualizaExp(obj) {
+			let op1 = document.getElementById('op1');
+			op1.value = obj.op1;
+			let op = document.getElementById('op');
+			op.value = obj.op;
+			let op2 = document.getElementById('op2');
+			op2.value = obj.op2;
+			let rst = document.getElementById('rst');
+			rst.value = obj.result;
+		}
+	</script>
+
+	<div id="main">
+		<button onclick="request1()">Request by Request API</button>	
+		<button onclick="request2()">Request by XMLHTTPRequest API</button>	
+	</div>
+
+
+	<div>
+		<label for="op1">Operando 1: </label><input id="op1" name="op1" value="">
+		<label for="op">Operação: </label><input id="op" name="op" value="">
+		<label for="op2">Operando 2: </label><input id="op2" name="op2" value="">
+		<br>
+		<label for="rst">Result: </label><input id="rst" name="rst" value="">
+	</div>
+</body>
+
+</html>
